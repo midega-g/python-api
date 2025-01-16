@@ -58,6 +58,8 @@ FastAPI is a modern, fast (high-performance) web framework for building APIs wit
    - **Return Statement**: The returned dictionary is converted to JSON.
 
 3. **Running the Application:**
+
+   **a. Running Uvicorn Without Packaging:**
    - Use `uvicorn` to run your FastAPI app:
 
      ```bash
@@ -67,10 +69,32 @@ FastAPI is a modern, fast (high-performance) web framework for building APIs wit
      - **`main`**: Refers to the name of the Python file (`main.py` without the `.py` extension) containing the FastAPI instance.
      - **`app`**: Refers to the FastAPI instance created in the script.
      - **`--reload`**: Enables live reloading, automatically restarting the server whenever the code changes. Useful during development.
+
    - Access the app at `http://127.0.0.1:8000/`.
 
+   **b. Running Uvicorn with a Package Structure:**
+   - Restructure the project by creating a folder for the application code. For example, create a folder named `app` and move the `main.py` file into it.
+   - Convert the folder into a Python package by adding an empty file named `__init__.py` inside the folder:
+
+     ```bash
+     mkdir app
+     mv main.py app/
+     touch app/__init__.py
+     ```
+
+   - Update the `uvicorn` command to include the package name:
+
+     ```bash
+     uvicorn app.main:app --reload
+     ```
+
+     - **`app`**: Refers to the package folder.
+     - **`main`**: Refers to the `main.py` file inside the `app` folder.
+     - **`app`**: Refers to the FastAPI instance created in the script.
+
 4. **Verify Output:**
-   - Visit `http://127.0.0.1:8000/` to see `{"message": "Hello, World!"}`.
+   - Verify that the application runs correctly by accessing it at `http://127.0.0.1:8000/`
+   - In this case you should see `{"message": "Hello, World!"}`.
 
 ## Using Postman to Test APIs
 

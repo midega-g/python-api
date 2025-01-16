@@ -1,7 +1,7 @@
 from typing import Optional
 
 from fastapi import Body, FastAPI, Response, HTTPException, status
-from pydantic import BaseModel, PositiveInt
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -10,7 +10,7 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool = True
-    rating: Optional[PositiveInt] = None
+    rating: Optional[int] = None
 
 
 def find_post_or_404(post_id: int):
