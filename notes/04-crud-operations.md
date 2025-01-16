@@ -102,8 +102,10 @@ def get_post(post_id: int):
 **Explanation**:
 
 - `@app.get` specifies the `GET` method.
-- The function uses a generator expression (`next((p for p in my_posts if p["id"] == post_id), None)`) to locate the post.
-  - This approach iterates through the `my_posts` array until it finds the first match or returns `None` if no match exists.
+  - The function uses a generator expression `(p for p in my_posts if p["id"]== post_id)` that iterates over `my_posts` and filters the first post where `p["id"]` is equal to `post_id`
+  - It does not create a list; instead it yields values one by one
+  - `next()` then retrieves the first matching item from the generator
+  - If no match is found, it returns the default value of `None`
 - Returns an error message if the post is not found.
 - Note: Path parameters are received as strings by default. Explicitly defining `post_id: int` ensures proper type handling and prevents unexpected behavior
 - Since we'll also use the syntax in `UPDATE` and `DELETE`, a function to handle this would be:
