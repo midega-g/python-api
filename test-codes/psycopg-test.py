@@ -14,7 +14,7 @@ def connect_to_db():
         try:
             connection = psycopg.connect(
                 user="postgres",
-                password="password",
+                password=input("Enter PostgreSQL password: "),
                 host="localhost",
                 port="5432",
                 dbname="fastapi",
@@ -28,7 +28,8 @@ def connect_to_db():
             print(f"Retrying in 5 seconds... {retry_count}/{MAX_RETRIES}")
             time.sleep(5)
 
-    print("❌ Max retries reached. Could not connect to the database.")
+    if retry_count == MAX_RETRIES:
+        print("❌ Max retries reached. Could not connect to the database.")
     return None  # Return None if connection fails
 
 
