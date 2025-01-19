@@ -1,5 +1,4 @@
 import time
-from typing import Optional
 
 import psycopg
 from fastapi import Body, FastAPI, Response, HTTPException, status
@@ -13,7 +12,6 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool = True
-    rating: Optional[int] = None
 
 
 my_posts = [
@@ -34,13 +32,15 @@ my_posts = [
 ]
 
 
-def find_post_or_404(post_id: int):
+def find_post_or_404(post_id):
     """Helper function to find a post by ID or raise a 404 exception."""
-    post = next((p for p in my_posts if p["id"] == post_id), None)
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM posts WHERE id = %s;", (post_id,))
+        post = cursor.fetchone()
     if not post:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Post with id {post_id} not found",
+            detail=f"Post with id: {post_id} was not found",
         )
     return post
 
@@ -60,11 +60,14 @@ while retry_count < MAX_RETRIES:
         print("✅ Connection to PostgreSQL DB successful")
         break
     except psycopg.Error as e:
-        print(f"⚠️ Error: {e}")
         retry_count += 1
-        print(f"Retrying in 5 seconds... {retry_count}/{MAX_RETRIES}")
-        time.sleep(2)
+        print(f"⚠️ Error: {e}")
+        if retry_count < MAX_RETRIES:
+            print(f"Retrying in 5 seconds... {retry_count}/{MAX_RETRIES}")
+            time.sleep(5)
 
+# This only runs if the loop completes without a successful connection
+if retry_count == MAX_RETRIES:
     print("❌ Max retries reached. Could not connect to the database.")
 
 
@@ -75,20 +78,36 @@ def root():
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
 def create_post(post: Post = Body(...)):
-    post_dict = post.model_dump()
-    post_dict["id"] = len(my_posts) + 1
-    my_posts.append(post_dict)
-    return {"data": my_posts}
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            insert into posts (title, content, published)
+            values (%s, %s, %s)
+            returning *
+            """,
+            (post.title, post.content, post.published),
+        )
+        new_post = cursor.fetchone()
+        connection.commit()
+    return {"data": new_post}
 
 
 @app.get("/posts")
 def get_posts():
-    return {"data": my_posts}
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM posts;")
+        posts = cursor.fetchall()
+        print(posts)
+    return {"data": posts}
 
 
 @app.get("/posts/latest")
 def get_latest_posts():
-    return {"data": sorted(my_posts, key=lambda p: p["id"], reverse=True)[:2]}
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM posts ORDER BY created_at DESC LIMIT 5;")
+        posts = cursor.fetchall()
+        print(posts)
+    return {"data": posts}
 
 
 @app.get("/posts/{post_id}")
@@ -99,15 +118,34 @@ def get_post(post_id: int):
 
 @app.delete("/posts/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(post_id: int):
-    post = find_post_or_404(post_id)
-    my_posts.remove(post)
+    find_post_or_404(post_id)
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "delete from posts where id = %s returning *;", (post_id,)
+        )
+        connection.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.put("/posts/{post_id}")
 def update_post(post_id: int, post: Post = Body(...)):
+    find_post_or_404(post_id)
     post_dict = post.model_dump()
-    post_dict["id"] = post_id
-    existing_post = find_post_or_404(post_id)
-    existing_post.update(post_dict)
-    return {"data": existing_post}
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            update posts
+            set title = %s, content = %s, published = %s
+            where id = %s
+            returning *
+            """,
+            (
+                post_dict["title"],
+                post_dict["content"],
+                post_dict["published"],
+                post_id,
+            ),
+        )
+        updated_post = cursor.fetchone()
+        connection.commit()
+    return {"data": updated_post}
