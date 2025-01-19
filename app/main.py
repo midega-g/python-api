@@ -1,7 +1,10 @@
+import time
 from typing import Optional
 
+import psycopg
 from fastapi import Body, FastAPI, Response, HTTPException, status
 from pydantic import BaseModel
+from psycopg.rows import dict_row
 
 app = FastAPI()
 
@@ -11,17 +14,6 @@ class Post(BaseModel):
     content: str
     published: bool = True
     rating: Optional[int] = None
-
-
-def find_post_or_404(post_id: int):
-    """Helper function to find a post by ID or raise a 404 exception."""
-    post = next((p for p in my_posts if p["id"] == post_id), None)
-    if not post:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Post with id {post_id} not found",
-        )
-    return post
 
 
 my_posts = [
@@ -40,6 +32,40 @@ my_posts = [
         "rating": 5,
     },
 ]
+
+
+def find_post_or_404(post_id: int):
+    """Helper function to find a post by ID or raise a 404 exception."""
+    post = next((p for p in my_posts if p["id"] == post_id), None)
+    if not post:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id {post_id} not found",
+        )
+    return post
+
+
+MAX_RETRIES = 5
+retry_count = 0
+while retry_count < MAX_RETRIES:
+    try:
+        connection = psycopg.connect(
+            user="postgres",
+            password="password",
+            host="localhost",
+            port="5432",
+            dbname="fastapi",
+            row_factory=dict_row,
+        )
+        print("✅ Connection to PostgreSQL DB successful")
+        break
+    except psycopg.Error as e:
+        print(f"⚠️ Error: {e}")
+        retry_count += 1
+        print(f"Retrying in 5 seconds... {retry_count}/{MAX_RETRIES}")
+        time.sleep(2)
+
+    print("❌ Max retries reached. Could not connect to the database.")
 
 
 @app.get("/")
