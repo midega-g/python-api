@@ -10,6 +10,7 @@ package-mode = false
 python = "^3.11"
 fastapi = {version="^0.115.6", extras=["all"]}
 SQLAlchemy = "^2.0.37"
+psycopg = {version="^3.2.4", extras=["binary"]}
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.0.0"
@@ -34,5 +35,6 @@ disable = [
     "missing-final-newline",
     "missing-module-docstring",
     "missing-class-docstring",
-    "invalid-name"
+    "invalid-name",
+    "no-member"
 ]
