@@ -314,3 +314,231 @@ SELECT * FROM products ORDER BY id LIMIT 10 OFFSET 10;
 ```
 
 By utilizing these SQL keywords and techniques, we can efficiently manage and retrieve data even from large databases while ensuring optimal performance and usability.
+
+## Adding New Entries to a Database Table
+
+### Using SQL to Insert Data
+
+Instead of relying on the GUI in PG Admin, SQL commands are used to add new entries to a database. Here's how it works:
+
+**Basic Syntax:**
+
+```sql
+INSERT INTO table_name (column1, column2, ...) VALUES (value1, value2, ...);
+```
+
+- `INSERT INTO`: Command to insert a new row.
+- `table_name`: Specify the table to insert data into.
+- `(column1, column2, ...)`: Specify the columns to insert data for.
+- `VALUES (value1, value2, ...)`: Specify the values for each column in the same order.
+
+**Example**
+Insert a new product into the `products` table:
+
+```sql
+INSERT INTO products (name, price, inventory) VALUES ('Tortilla', 4, 1000);
+```
+
+- Inserts a product named "Tortilla" with a price of $4 and inventory of 1000.
+- Columns `is_sale` and others not specified use their default values.
+
+### Order Matching
+
+The order of columns in the `INSERT INTO` statement must match the order of values provided. If the order changes, the corresponding values must also be adjusted.
+
+**Example with Reordered Columns:**
+
+```sql
+INSERT INTO products (price, name, inventory) VALUES (4, 'Tortilla', 1000);
+```
+
+Here, the price is listed first, so it must be the first value provided.
+
+### Returning Inserted Data
+
+To automatically return the newly inserted row(s):
+
+```sql
+INSERT INTO products (name, price, inventory)
+VALUES ('Car', 10000, 1)
+RETURNING *;
+```
+
+- `RETURNING *`: Returns all columns of the inserted row.
+- You can specify specific columns to return (e.g., `RETURNING id, name`).
+
+### Inserting Multiple Rows
+
+You can insert multiple rows in a single query:
+
+```sql
+INSERT INTO products (name, price, inventory)
+VALUES
+  ('Laptop', 50, 25),
+  ('Monitor', 60, 4);
+```
+
+This adds two products: a laptop and a monitor.
+
+## Updating Existing Entries
+
+**Basic Syntax:**
+
+```sql
+UPDATE table_name
+SET column1 = value1, column2 = value2, ...
+WHERE condition;
+```
+
+- `UPDATE`: Command to modify rows.
+- `SET`: Specifies the columns to update and their new values.
+- `WHERE condition`: Specifies which rows to update.
+
+**Example**
+Update a product:
+
+```sql
+UPDATE products
+SET name = 'Flour Tortilla', price = 40
+WHERE id = 25;
+```
+
+- Changes the name and price of the product with `id = 25`.
+
+### Returning Updated Data
+
+To return the updated row:
+
+```sql
+UPDATE products
+SET is_sale = TRUE
+WHERE id = 30
+RETURNING *;
+```
+
+- Returns the updated row after setting `is_sale` to `TRUE`.
+
+### Updating Multiple Rows
+
+To update rows based on a condition:
+
+```sql
+UPDATE products
+SET is_sale = TRUE
+WHERE id > 15;
+```
+
+- Sets `is_sale` to `TRUE` for all products with `id > 15`.
+
+Additional scenarios for updating multiple rows:
+
+1. **Update prices for all products above a certain threshold:**
+
+   ```sql
+   UPDATE products SET price = price * 1.1 WHERE price > 100;
+   ```
+
+2. **Set discontinued products as inactive:**
+
+   ```sql
+   UPDATE products SET status = 'inactive' WHERE status = 'discontinued';
+   ```
+
+3. **Increase inventory for low-stock products:**
+
+   ```sql
+   UPDATE products SET inventory = inventory + 10 WHERE inventory < 5;
+   ```
+
+4. **Update multiple fields in a single query:**
+
+   ```sql
+   UPDATE products SET price = price * 0.9, is_sale = TRUE WHERE category = 'electronics';
+   ```
+
+5. **Update outdated records based on a date condition:**
+
+   ```sql
+   UPDATE products SET status = 'archived' WHERE created_at < '2023-01-01';
+   ```
+
+## Deleting Entries from a Database Table
+
+### Basic Syntax
+
+```sql
+DELETE FROM table_name WHERE condition;
+```
+
+- `DELETE FROM`: Command to delete rows.
+- `WHERE condition`: Specifies which rows to delete.
+
+**Example**
+Delete a product by its ID:
+
+```sql
+DELETE FROM products WHERE id = 10;
+```
+
+- Deletes the product with `id = 10`.
+
+### Returning Deleted Data
+
+To see the data before deletion:
+
+```sql
+DELETE FROM products WHERE id = 11 RETURNING *;
+```
+
+- Returns the deleted row's data.
+
+### Deleting Multiple Rows
+
+To delete rows matching a condition:
+
+```sql
+DELETE FROM products WHERE inventory = 0;
+```
+
+- Deletes all products with an inventory of 0
+
+Additional scenarios for deleting multiple rows:
+
+1. **Delete products priced below a certain threshold:**
+
+   ```sql
+   DELETE FROM products WHERE price < 10;
+   ```
+
+2. **Delete discontinued products:**
+
+   ```sql
+   DELETE FROM products WHERE status = 'discontinued';
+   ```
+
+3. **Delete multiple rows using a list of IDs:**
+
+   ```sql
+   DELETE FROM products WHERE ID IN (5, 10, 15);
+   ```
+
+4. **Delete old records beyond a certain date:**
+
+   ```sql
+   DELETE FROM products WHERE created_at < '2023-01-01';
+   ```
+
+5. **Delete all products with low inventory and high price:**
+
+   ```sql
+   DELETE FROM products WHERE inventory < 5 AND price > 100;
+   ```
+
+## Key Takeaways
+
+1. Use `INSERT INTO` to add rows, and ensure the column and value orders match.
+2. Use `UPDATE` to modify existing rows, with the option to return the updated data.
+3. Use `DELETE FROM` to remove rows, optionally returning the deleted data.
+4. The `RETURNING` keyword simplifies getting results from `INSERT`, `DELETE`, or `UPDATE` commands.
+
+[[TOC]]
