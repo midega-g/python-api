@@ -1,10 +1,10 @@
-from fastapi import Body, Depends, FastAPI, Response, status
+from fastapi import Body, Depends, FastAPI, Response, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import select
 
-from .utils import get_post_or_404
-from .models import Base, Post
-from .schemas import PostCreate, PostResponse
+from .utils import hash_password, create_new_user, get_post_or_404
+from .models import Base, Post, User
+from .schemas import PostCreate, UserCreate, PostResponse, UserResponse
 from .database import engine, get_db
 
 Base.metadata.create_all(bind=engine)
@@ -73,3 +73,22 @@ def delete_post(post_id: int, db: Session = Depends(get_db)):
     db.delete(existing_post)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@app.post(
+    "/users", status_code=status.HTTP_201_CREATED, response_model=UserResponse
+)
+def create_user(user: UserCreate = Body(...), db: Session = Depends(get_db)):
+    user.password = hash_password(user.password)
+    return create_new_user(db, user.model_dump())
+
+
+@app.get("/users/{user_id}", response_model=UserResponse)
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User with {user_id} not found",
+        )
+    return user

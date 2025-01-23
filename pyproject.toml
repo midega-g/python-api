@@ -11,6 +11,7 @@ python = "^3.11"
 fastapi = {version="^0.115.6", extras=["all"]}
 SQLAlchemy = "^2.0.37"
 psycopg = {version="^3.2.4", extras=["binary"]}
+bcrypt = "^4.2.1"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.0.0"
