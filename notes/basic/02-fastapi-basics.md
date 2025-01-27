@@ -1,12 +1,10 @@
-[[TOC]]
-
 # FastAPI Basics, Postman, and HTTP Request Functions
 
-# Introduction to FastAPI
+## Introduction to FastAPI
 
 FastAPI is a modern, fast (high-performance) web framework for building APIs with Python 3.7+ based on standard Python type hints.
 
-## Setting Up FastAPI
+### Setting Up FastAPI
 
 1. **Install FastAPI:**
    - Basic installation:
@@ -33,7 +31,7 @@ FastAPI is a modern, fast (high-performance) web framework for building APIs wit
 3. **Understanding File Structure:**
    - Installed libraries and dependencies reside in the `lib` folder of your virtual environment.
 
-## Writing First FastAPI Application
+### Writing First FastAPI Application
 
 1. **Import and Create an Instance:**
 
@@ -96,12 +94,12 @@ FastAPI is a modern, fast (high-performance) web framework for building APIs wit
    - Verify that the application runs correctly by accessing it at `http://127.0.0.1:8000/`
    - In this case you should see `{"message": "Hello, World!"}`.
 
-## Using Postman to Test APIs
+### Using Postman to Test APIs
 
 - Postman is a popular tool to test APIs without a browser.
 - It enables sending HTTP requests and viewing responses.
 
-### Steps to Use Postman
+#### Steps to Use Postman
 
 1. **Install Postman:**
    - Download from [Postman’s official site](https://www.postman.com/downloads/).
@@ -120,9 +118,9 @@ FastAPI is a modern, fast (high-performance) web framework for building APIs wit
    - **Body:** Add JSON or other payloads for POST/PUT requests.
    - **Collections:** Group related API requests and saving them with memorable names
 
-# Understanding FastAPI Code Syntax
+## Understanding FastAPI Code Syntax
 
-## Path Operations
+### Path Operations
 
 Terminology used in FastAPI to describe routes (endpoints)
 
@@ -163,7 +161,7 @@ Terminology used in FastAPI to describe routes (endpoints)
 3. **Asynchronous Functions (Optional):**
    - Use `async def` for tasks like database queries or external API calls.
 
-## Naming Conventions in FastAPI
+### Naming Conventions in FastAPI
 
 1. **File Names:**
    - Use descriptive names like `main.py` or `app.py`.
@@ -184,7 +182,7 @@ Terminology used in FastAPI to describe routes (endpoints)
      @app.post("/create-user")
      ```
 
-# HTTP Request Functions and Their Application in FastAPI
+### HTTP Request Functions and Their Application in FastAPI
 
 [HTTP methods](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods) define the type of operation performed on a resource:
 
@@ -220,7 +218,7 @@ Terminology used in FastAPI to describe routes (endpoints)
        return {"message": f"Item {item_id} deleted"}
    ```
 
-## More about `POST` Request
+### More about `POST` Request
 
 - `POST` requests differ from `GET` requests primarily in their functionality and purpose.
 - A `GET` request retrieves data from the API server, whereas a `POST` request sends data to the API server for processing or creating new resources.
@@ -291,3 +289,78 @@ def create_post(payload: dict = Body(...)):
   - Enhances clarity by explicitly defining request bodies.
   - Provides built-in validation and parsing of payloads.
   - Improves API documentation with clear parameter definitions.
+
+## Advanced Postman Features: Environments and Automated Authentication
+
+### Environments in Postman
+
+- **Definition**: An environment in Postman is a set of variables that allow you to switch the context of your requests.
+- **Purpose**: Avoid hardcoding values like IP addresses, ports, and protocols (HTTP/HTTPS) in your requests. This is especially useful when switching between different environments (e.g., development and production).
+
+#### Example Scenario
+
+- **Development Environment**: Requests are hardcoded to `127.0.0.1:8000`.
+- **Production Environment**: Requests need to be directed to a public IP or domain with HTTPS.
+- **Problem**: Manually changing these values every time you switch environments is inefficient.
+
+#### Creating an Environment
+
+1. **Go to the Environments Tab**:
+   - Click on the "Environments" tab in Postman.
+2. **Create a New Environment**:
+   - Name the environment (e.g., `dev` for development).
+   - Add a variable (e.g., `URL`) and set its initial value (e.g., `http://127.0.0.1:8000`).
+   - Save the environment.
+
+#### Using Environment Variables in Requests
+
+- Replace hardcoded values with variables using double curly braces: `{{variable_name}}`.
+  - Example: Replace `http://127.0.0.1:8000` with `{{URL}}`.
+- **Verification**: If the variable resolves correctly, it will appear in blue. If it’s red, there’s an issue with the variable.
+
+#### Switching Between Environments
+
+- Create multiple environments (e.g., `dev` and `prod`).
+  - **Dev Environment**: `http://127.0.0.1:8000`
+  - **Prod Environment**: `https://app.com/`
+- Switch environments in Postman to automatically update the variables.
+
+### Automated Authentication with Environment Variables
+
+- **Challenge**: Testing authenticated endpoints requires manually copying and pasting access tokens, which is cumbersome, especially with short token expiration times.
+- **Solution**: Automate the process using Postman's scripting capabilities.
+
+#### Steps to Automate Authentication
+
+1. **Login Endpoint**:
+   - Send a request to the login endpoint to retrieve an access token.
+2. **Set Environment Variable via Script**:
+   - Go to the "Scripts" tab in the login request.
+   - Use the following script to set an environment variable with the access token:
+
+     ```javascript
+     pm.environment.set("JWT", pm.response.json().access_token);
+     ```
+
+   - Explanation:
+     - `pm.response.json().access_token`: Retrieves the access token from the login response.
+     - `pm.environment.set("JWT", value)`: Sets the `JWT` environment variable with the token value.
+3. **Use the Token in Other Requests**:
+   - Replace hardcoded tokens with the `{{JWT}}` variable in authenticated requests (e.g., headers).
+   - Example: In the `Authorization` header, use `Bearer {{JWT}}`.
+
+#### Verification
+
+- After logging in, check the environment variables to confirm the `JWT` variable is updated.
+- Use the token in other endpoints (e.g., `create post`, `get posts`) without manually copying and pasting.
+
+### Updating All Endpoints
+
+- Apply the `{{JWT}}` variable to all authenticated endpoints:
+  - `get posts`
+  - `get individual post`
+  - `delete post`
+  - `update post`
+- **Note**: Some endpoints (e.g., `create user`) may not require authentication initially.
+
+[[TOC]]
