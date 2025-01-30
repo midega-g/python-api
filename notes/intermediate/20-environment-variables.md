@@ -107,7 +107,7 @@
 
 - **`.gitignore`**: Ensure the `.env` file is not checked into Git to avoid exposing sensitive information.
 
-  ```
+  ```plaintext
   .env
   __pycache__/
   venv/
