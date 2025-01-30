@@ -1,0 +1,12 @@
+# change the filename to .env
+# replace with your values
+# add .env to .gitignore
+
+DATABASE_HOSTNAME=localhost
+DATABASE_PORT=5432
+DATABASE_PASSWORD=password123
+DATABASE_NAME=fastapi
+DATABASE_USERNAME=postgres
+SECRET_KEY_FASTAPI_AUTH=your_secret_key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
