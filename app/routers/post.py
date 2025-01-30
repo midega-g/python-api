@@ -1,4 +1,12 @@
-from fastapi import Body, Depends, Response, APIRouter, status
+from fastapi import (
+    Body,
+    Query,
+    Depends,
+    Response,
+    APIRouter,
+    HTTPException,
+    status,
+)
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import select
 
@@ -18,8 +26,8 @@ def create_post(
     post: PostCreate = Body(...),
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
-):  # pylint: disable=unused-argument
-    new_post = Post(**post.model_dump())
+):
+    new_post = Post(owner_id=current_user.id, **post.model_dump())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
@@ -28,9 +36,23 @@ def create_post(
 
 @router.get("/", response_model=list[PostResponse])
 def get_posts(
-    db: Session = Depends(get_db), current_user: str = Depends(get_current_user)
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+    limit: int = 10,
+    skip: int = 0,
+    search: str = Query(default=""),
 ):  # pylint: disable=unused-argument
-    all_posts = db.execute(select(Post)).scalars().all()
+    print(limit)
+    all_posts = (
+        db.execute(
+            select(Post)
+            .where(Post.title.contains(search))
+            .offset(skip)
+            .limit(limit)
+        )
+        .scalars()
+        .all()
+    )
     return all_posts
 
 
@@ -54,7 +76,9 @@ def get_post(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):  # pylint: disable=unused-argument
-    return get_post_or_404(post_id, db)
+
+    existing_post = get_post_or_404(post_id, db)
+    return existing_post
 
 
 @router.put("/{post_id}", response_model=PostResponse)
@@ -63,9 +87,13 @@ def update_post(
     post: PostCreate = Body(...),
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
-):  # pylint: disable=unused-argument
+):
     existing_post = get_post_or_404(post_id, db)
-
+    if existing_post.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to update this post",
+        )
     for key, value in post.model_dump(exclude_unset=True).items():
         setattr(existing_post, key, value)
 
@@ -83,8 +111,13 @@ def delete_post(
     post_id: int,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
-):  # pylint: disable=unused-argument
+):
     existing_post = get_post_or_404(post_id, db)
+    if existing_post.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to delete this post",
+        )
     db.delete(existing_post)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
