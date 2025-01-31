@@ -1,3 +1,5 @@
+# pylint: disable=not-callable
+
 from fastapi import (
     Body,
     Query,
@@ -8,12 +10,12 @@ from fastapi import (
     status,
 )
 from sqlalchemy.orm import Session
-from sqlalchemy.sql import select
+from sqlalchemy.sql import func, select
 
 from app.utils import get_post_or_404
-from app.models import Post
+from app.models import Post, Vote
 from app.oauth2 import get_current_user
-from app.schemas import PostCreate, PostResponse
+from app.schemas import PostCreate, PostResponse, PostWithVotes
 from app.database import get_db
 
 router = APIRouter(prefix="/posts", tags=["Posts"])
@@ -34,7 +36,8 @@ def create_post(
     return new_post
 
 
-@router.get("/", response_model=list[PostResponse])
+# @router.get("/", response_model=list[PostResponse])
+@router.get("/", response_model=list[PostWithVotes])
 def get_posts(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
@@ -42,18 +45,16 @@ def get_posts(
     skip: int = 0,
     search: str = Query(default=""),
 ):  # pylint: disable=unused-argument
-    print(limit)
-    all_posts = (
-        db.execute(
-            select(Post)
-            .where(Post.title.contains(search))
-            .offset(skip)
-            .limit(limit)
-        )
-        .scalars()
-        .all()
+    stmt = (
+        select(Post, func.count(Vote.post_id).label("votes"))
+        .outerjoin(Vote, Post.id == Vote.post_id)
+        .where(Post.title.contains(search))
+        .group_by(Post.id)
+        .offset(skip)
+        .limit(limit)
     )
-    return all_posts
+    results = db.execute(stmt).all()
+    return results
 
 
 @router.get("/latest/{count_}", response_model=list[PostResponse])
@@ -70,15 +71,23 @@ def get_latest_posts(
     return latest_posts
 
 
-@router.get("/{post_id}", response_model=PostResponse)
+@router.get("/{post_id}", response_model=PostWithVotes)
 def get_post(
     post_id: int,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):  # pylint: disable=unused-argument
 
-    existing_post = get_post_or_404(post_id, db)
-    return existing_post
+    get_post_or_404(post_id, db)
+    stmt = (
+        select(Post)
+        .outerjoin(Vote, Post.id == Vote.post_id)
+        .group_by(Post.id)
+        .add_columns(func.count(Vote.post_id).label("votes"))
+        .where(Post.id == post_id)
+    )
+    print(stmt)
+    return db.execute(stmt).first()
 
 
 @router.put("/{post_id}", response_model=PostResponse)
