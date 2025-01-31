@@ -4,6 +4,7 @@ import jwt
 from jwt import InvalidTokenError
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import select
 from fastapi.security import OAuth2PasswordBearer
 
 from app.config import settings
@@ -60,7 +61,11 @@ def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     token = verify_token(token, credential_exception)
-    user = db.query(User).filter(User.id == token.user_id).first()
+    user = (
+        db.execute(select(User).where(User.id == token.user_id))
+        .scalars()
+        .first()
+    )
     if user is None:
         raise credential_exception
     return user
