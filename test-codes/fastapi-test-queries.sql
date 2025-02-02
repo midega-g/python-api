@@ -1,6 +1,7 @@
 select * from posts; -- 3, 2
 select * from users; -- 1 & 4
 select * from votes;
+select * from alembic_version;
 
 insert into votes (post_id, user_id) values (4, 3);
 delete from votes;
