@@ -4,7 +4,6 @@ version = "0.1.0"
 description = "Building an API with Python"
 authors = ["midega-g <midegageorge2@gmail.com>"]
 readme = "README.md"
-package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -14,6 +13,7 @@ psycopg = {version="^3.2.4", extras=["binary"]}
 bcrypt = "^4.2.1"
 PyJWT = {version="^2.10.1", extras=["crypto"]}
 alembic = "^1.14.1"
+gunicorn = "^23.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.1.0"
