@@ -144,8 +144,7 @@ Deploying a FastAPI application with Alembic migrations to **Render** involves s
 
 Your final folder structure should look like this:
 
-```
-.
+```plaintext
 ├── alembic
 │   ├── env.py
 │   ├── README
