@@ -1,5 +1,3 @@
-# pragma: allowlist secret
-version: "3.9"
 services:
   api:
     build: .
@@ -8,13 +6,13 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_HOSTNAME=postgres # Use 'postgres' instead of 127.0.0.1
-      - DATABASE_PORT=5432
-      - DATABASE_PASSWORD=password
-      - DATABASE_NAME=fastapi
-      - DATABASE_USERNAME=postgres
-      - SECRET_KEY_FASTAPI_AUTH=d58d44eb67a3087ef343aee359062ea975b4984a52ed88ea58686f27ce28a524
-      - ALGORITHM=HS256
-      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+      - DATABASE_PORT=${DATABASE_PORT}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USERNAME=${DATABASE_USERNAME}
+      - SECRET_KEY_FASTAPI_AUTH=${SECRET_KEY_FASTAPI_AUTH}
+      - ALGORITHM=${ALGORITHM}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
     depends_on:
       - postgres
     volumes:
@@ -28,8 +26,8 @@ services:
     container_name: fastapi_postgres
     restart: always
     environment:
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: fastapi
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
