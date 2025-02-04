@@ -1,0 +1,16 @@
+.qodo/
+.venv/
+.vscode/
+.env
+*.pyc
+*.pyo
+env_
+start.sh
+__pycache/
+notes/
+test-codes
+Dockerfile
+.dockerignore
+.pytest_cache
+nginx
+gunicorn.service
