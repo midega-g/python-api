@@ -5,7 +5,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_HOSTNAME=postgres # Use 'postgres' instead of 127.0.0.1
+      - DATABASE_HOSTNAME={DATABASE_HOSTNAME_POSTGRES} # Use 'postgres' instead of 127.0.0.1
       - DATABASE_PORT=${DATABASE_PORT}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - DATABASE_NAME=${DATABASE_NAME}

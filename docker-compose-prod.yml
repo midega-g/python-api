@@ -1,11 +1,11 @@
 services:
   api:
-    image: midega/python-api-v2
+    build: .
     container_name: fastapi_app
     ports:
       - "8080:8000"
     environment:
-      - DATABASE_HOSTNAME=postgres
+      - DATABASE_HOSTNAME=${DATABASE_HOSTNAME_POSTGRES}
       - DATABASE_PORT=${DATABASE_PORT}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - DATABASE_NAME=${DATABASE_NAME}
