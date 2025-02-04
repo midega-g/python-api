@@ -36,6 +36,7 @@ repos:
     - id: detect-secrets
       name: check for secret keys
       args: ["--baseline", ".secrets.baseline"]
+      exclude: "docker-compose-dev.yml" # this file should be ignored
 
   - repo: https://github.com/pycqa/isort
     rev: 6.0.0 # check version from pip file
