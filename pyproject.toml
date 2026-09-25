@@ -7,7 +7,8 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = {version="^0.115.6", extras=["all"]}
+fastapi = {version="^0.141.1", extras=["all"]}
+starlette = ">=1.3.1"  # patched (CVE-2026-54283 and others)
 SQLAlchemy = "^2.0.37"
 psycopg = {version="^3.2.4", extras=["binary"]}
 bcrypt = "^4.2.1"
@@ -18,7 +19,7 @@ gunicorn = "^23.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.1.0"
-black = "^25.1.0"
+black = "^26.3.1"
 isort = "^6.0.0"
 pylint = "^3.3.4"
 detect-secrets = "^1.5.0"
