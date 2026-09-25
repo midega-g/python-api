@@ -12,6 +12,7 @@ SQLAlchemy = "^2.0.37"
 psycopg = {version="^3.2.4", extras=["binary"]}
 bcrypt = "^4.2.1"
 PyJWT = {version="^2.10.1", extras=["crypto"]}
+cryptography = ">=49.0"  # pin to patched version (CVE-2026-69249)
 alembic = "^1.14.1"
 gunicorn = "^23.0.0"
 
